@@ -1,0 +1,950 @@
+slip-1
+
+Q1-Write a Java Program to implement I/O Decorator for converting uppercase letters to 
+lower case letters.
+ 
+import java.io.*;
+
+class LowerCaseInputStream extends FilterInputStream {
+    
+    protected LowerCaseInputStream(InputStream in) {
+        super(in);
+    }
+
+    @Override
+    public int read() throws IOException {
+        int c = super.read();
+        return (c == -1 ? c : Character.toLowerCase(c));
+    }
+}
+
+public class LowerCaseConverterDemo {
+    public static void main(String[] args) {
+        String text = "Hello World! THIS is a Test STRING.";
+        
+        try (InputStream input = new LowerCaseInputStream(new ByteArrayInputStream(text.getBytes()))) {
+            int c;
+            while ((c = input.read()) != -1) {
+                System.out.print((char) c);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+   }
+}
+
+Slip-2
+Q-1  Write a Java Program to implement Singleton pattern for multithreading
+
+class Singleton {
+    private Singleton() {
+
+    }
+    private static class SingletonHelper {
+        private static final Singleton INSTANCE = new Singleton();
+    }
+    public static Singleton getInstance() {
+        return SingletonHelper.INSTANCE;
+    }
+    public void showMessage() {
+        System.out.println("Hello from Singleton!");
+    }
+}
+public class SingletonTest {
+    public static void main(String[] args) {
+        Runnable task = () -> {
+            Singleton instance = Singleton.getInstance();
+            instance.showMessage();
+        };
+        Thread thread1 = new Thread(task);
+        Thread thread2 = new Thread(task);
+        Thread thread3 = new Thread(task);
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        try {
+            thread1.join();
+            thread2.join();
+            thread3.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+slip-3
+Q-1Write a JAVA Program to implement built-in support (java.util.Observable) Weather 
+station with members temperature, humidity, pressure and methods 
+mesurmentsChanged(), setMesurment(), getTemperature(), getHumidity(), 
+getPressure() 
+
+import java.util.Observable;
+import java.util.Observer;
+
+// WeatherStation class that extends Observable
+class WeatherStation extends Observable {
+    private float temperature;
+    private float humidity;
+    private float pressure;
+
+    // Method to update measurements
+    public void setMeasurement(float temperature, float humidity, float pressure) {
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.pressure = pressure;
+        measurementsChanged();
+    }
+
+    // Method to notify observers of measurement changes
+    public void measurementsChanged() {
+        setChanged();         // Marks this Observable as having been changed
+        notifyObservers();     // Notifies all registered observers
+    }
+
+    // Getter methods
+    public float getTemperature() {
+        return temperature;
+    }
+
+    public float getHumidity() {
+        return humidity;
+    }
+
+    public float getPressure() {
+        return pressure;
+    }
+}
+
+// Display class that implements Observer
+class WeatherDisplay implements Observer {
+    private float temperature;
+    private float humidity;
+    private float pressure;
+
+    // Updates the display whenever measurements change
+    @Override
+    public void update(Observable observable, Object arg) {
+        if (observable instanceof WeatherStation) {
+            WeatherStation weatherStation = (WeatherStation) observable;
+            this.temperature = weatherStation.getTemperature();
+            this.humidity = weatherStation.getHumidity();
+            this.pressure = weatherStation.getPressure();
+            display();
+        }
+    }
+
+    // Method to display current measurements
+    public void display() {
+        System.out.println("Current Weather Conditions:");
+        System.out.println("Temperature: " + temperature + "C");
+        System.out.println("Humidity: " + humidity + " %");
+        System.out.println("Pressure: " + pressure + " hPa");
+    }
+}
+
+// Main class to test the WeatherStation and WeatherDisplay
+public class WeatherStationTest {
+    public static void main(String[] args) {
+        // Create a WeatherStation instance
+        WeatherStation weatherStation = new WeatherStation();
+
+        // Create a WeatherDisplay instance and register it as an observer
+        WeatherDisplay display = new WeatherDisplay();
+        weatherStation.addObserver(display);
+
+        // Simulate changing weather measurements
+        weatherStation.setMeasurement(25.0f, 65.0f, 1013.0f);
+        weatherStation.setMeasurement(27.0f, 70.0f, 1012.0f);
+        weatherStation.setMeasurement(30.0f, 75.0f, 1011.0f);
+    }
+}
+
+
+Slip-4
+Q-1 Write a Java Program to implement Factory method for Pizza Store with createPizza(), 
+orederPizza(), prepare(), Bake(), cut(), box(). Use this to create variety of pizza’s
+like NyStyleCheesePizza, ChicagoStyleCheesePizza etc
+
+// Abstract Pizza class
+abstract class Pizza {
+    String name;
+
+    public void prepare() {
+        System.out.println("Preparing " + name);
+    }
+
+    public void bake() {
+        System.out.println("Baking " + name);
+    }
+
+    public void cut() {
+        System.out.println("Cutting " + name);
+    }
+
+    public void box() {
+        System.out.println("Boxing " + name);
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+// NY Style Cheese Pizza class
+class NyStyleCheesePizza extends Pizza {
+    public NyStyleCheesePizza() {
+        name = "NY Style Cheese Pizza";
+    }
+}
+
+// Chicago Style Cheese Pizza class
+class ChicagoStyleCheesePizza extends Pizza {
+    public ChicagoStyleCheesePizza() {
+        name = "Chicago Style Cheese Pizza";
+    }
+}
+
+// Abstract PizzaStore class with the factory method
+abstract class PizzaStore {
+    public Pizza orderPizza(String type) {
+        Pizza pizza = createPizza(type); // Factory method
+
+        pizza.prepare();
+        pizza.bake();
+        pizza.cut();
+        pizza.box();
+
+        return pizza;
+    }
+
+    // Factory method to be implemented by subclasses
+    protected abstract Pizza createPizza(String type);
+}
+
+// NY Pizza Store class
+class NyPizzaStore extends PizzaStore {
+    @Override
+    protected Pizza createPizza(String type) {
+        if (type.equals("cheese")) {
+            return new NyStyleCheesePizza();
+        }
+        // Add more NY-style pizzas here if needed
+        return null;
+    }
+}
+
+// Chicago Pizza Store class
+class ChicagoPizzaStore extends PizzaStore {
+    @Override
+    protected Pizza createPizza(String type) {
+        if (type.equals("cheese")) {
+            return new ChicagoStyleCheesePizza();
+        }
+        // Add more Chicago-style pizzas here if needed
+        return null;
+    }
+}
+
+// Test class for the PizzaStore
+public class PizzaStoreTest {
+    public static void main(String[] args) {
+        PizzaStore nyStore = new NyPizzaStore();
+        PizzaStore chicagoStore = new ChicagoPizzaStore();
+
+        Pizza pizza = nyStore.orderPizza("cheese");
+        System.out.println("Ordered a " + pizza.getName() + "\n");
+
+        pizza = chicagoStore.orderPizza("cheese");
+        System.out.println("Ordered a " + pizza.getName() + "\n");
+    }
+}
+
+
+Slip-6
+Q-1  Write a Java Program to implement command pattern to test Remote Control
+
+// Command interface
+interface Command {
+    void execute();
+}
+
+// Light class (Receiver)
+class Light {
+    public void on() {
+        System.out.println("Light is ON");
+    }
+
+    public void off() {
+        System.out.println("Light is OFF");
+    }
+}
+
+// LightOnCommand class
+class LightOnCommand implements Command {
+    private Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.on();
+    }
+}
+
+// LightOffCommand class
+class LightOffCommand implements Command {
+    private Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.off();
+    }
+}
+
+// RemoteControl class (Invoker)
+class RemoteControl {
+    private Command command;
+
+    // Set the command to be executed
+    public void setCommand(Command command) {
+        this.command = command;
+    }
+
+    // Execute the command
+    public void pressButton() {
+        command.execute();
+    }
+}
+
+// Test class for the RemoteControl
+public class RemoteControlTest {
+    public static void main(String[] args) {
+        // Create a Light (Receiver)
+        Light light = new Light();
+
+        // Create commands for the Light
+        Command lightOn = new LightOnCommand(light);
+        Command lightOff = new LightOffCommand(light);
+
+        // Create a RemoteControl (Invoker)
+        RemoteControl remote = new RemoteControl();
+
+        // Turn the light ON
+        remote.setCommand(lightOn);
+        remote.pressButton();
+
+        // Turn the light OFF
+        remote.setCommand(lightOff);
+        remote.pressButton();
+    }
+}
+
+
+Slip-7
+Q-1 Write a Java Program to implement undo command to test Ceiling fan.
+
+class CeilingFan {
+    private String location;
+    private String state;
+
+    public CeilingFan(String location) {
+        this.location = location;
+        this.state = "OFF";
+    }
+
+    public void on() {
+        state = "ON";
+        System.out.println(location + " Ceiling Fan is ON");
+    }
+
+    public void off() {
+        state = "OFF";
+        System.out.println(location + " Ceiling Fan is OFF");
+    }
+
+    public String getState() {
+        return state;
+    }
+}
+
+interface Command {
+    void execute();
+    void undo();
+}
+
+class CeilingFanOnCommand implements Command {
+    private CeilingFan ceilingFan;
+
+    public CeilingFanOnCommand(CeilingFan ceilingFan) {
+        this.ceilingFan = ceilingFan;
+    }
+
+    @Override
+    public void execute() {
+        ceilingFan.on();
+    }
+
+    @Override
+    public void undo() {
+        ceilingFan.off();
+    }
+}
+
+class CeilingFanOffCommand implements Command {
+    private CeilingFan ceilingFan;
+
+    public CeilingFanOffCommand(CeilingFan ceilingFan) {
+        this.ceilingFan = ceilingFan;
+    }
+
+    @Override
+    public void execute() {
+        ceilingFan.off();
+    }
+
+    @Override
+    public void undo() {
+        ceilingFan.on();
+    }
+}
+
+class RemoteControl {
+    private Command command;
+    private Command lastCommand;
+
+    public void setCommand(Command command) {
+        this.command = command;
+    }
+
+    public void buttonWasPressed() {
+        command.execute();
+        lastCommand = command;
+    }
+
+    public void undoButtonWasPressed() {
+        if (lastCommand != null) {
+            lastCommand.undo();
+        }
+    }
+}
+
+public class CeilingFanTest {
+    public static void main(String[] args) {
+        RemoteControl remote = new RemoteControl();
+        CeilingFan ceilingFan = new CeilingFan("Living Room");
+
+        CeilingFanOnCommand ceilingFanOn = new CeilingFanOnCommand(ceilingFan);
+        CeilingFanOffCommand ceilingFanOff = new CeilingFanOffCommand(ceilingFan);
+
+        // Turn the fan on
+        remote.setCommand(ceilingFanOn);
+        remote.buttonWasPressed();
+
+        // Undo the last command (turn the fan off)
+        remote.undoButtonWasPressed();
+
+        // Turn the fan off
+        remote.setCommand(ceilingFanOff);
+        remote.buttonWasPressed();
+
+        // Undo the last command (turn the fan on)
+        remote.undoButtonWasPressed();
+    }
+}
+
+
+Slip-11
+Q-1 Write a java program to implement Adapter pattern to design Heart Model to Beat 
+Model
+// Step 1: Define the BeatModel interface
+interface BeatModel {
+    void doBeat();
+}
+
+// Step 2: Define the HeartModel class
+class HeartModel {
+    public void beat() {
+        System.out.println("Heart is beating...");
+    }
+}
+
+// Step 3: Create the HeartAdapter class to adapt HeartModel to BeatModel
+class HeartAdapter implements BeatModel {
+    private HeartModel heartModel;
+
+    public HeartAdapter(HeartModel heartModel) {
+        this.heartModel = heartModel;
+    }
+
+    @Override
+    public void doBeat() {
+        // Adapt the call from doBeat() to beat() of HeartModel
+        heartModel.beat();
+    }
+}
+
+// Step 4: Main class to test the Adapter Pattern
+public class Main {
+    public static void main(String[] args) {
+        // Create a HeartModel instance
+        HeartModel heart = new HeartModel();
+
+        // Create an adapter that adapts HeartModel to BeatModel
+        BeatModel beatModel = new HeartAdapter(heart);
+
+        // Now we can call doBeat() on BeatModel interface, and it will call HeartModel's beat()
+        beatModel.doBeat();
+    }
+}
+
+
+
+slip-12
+Q-1  Write a Java Program to implement Decorator Pattern for interface Car to define the 
+assemble() method and then decorate it to Sports car and Luxury Car
+
+// Step 1: Define the Car interface
+interface Car {
+    void assemble();
+}
+
+// Step 2: Concrete implementation of a basic Car
+class BasicCar implements Car {
+    @Override
+    public void assemble() {
+        System.out.print("Basic Car. ");
+    }
+}
+
+// Step 3: Decorator class that implements the Car interface
+class CarDecorator implements Car {
+    protected Car decoratedCar;
+
+    public CarDecorator(Car car) {
+        this.decoratedCar = car;
+    }
+
+    @Override
+    public void assemble() {
+        this.decoratedCar.assemble(); // Delegate the assembly to the decorated car
+    }
+}
+
+// Step 4: Concrete Decorator for a Sports Car
+class SportsCar extends CarDecorator {
+    public SportsCar(Car car) {
+        super(car);
+    }
+
+    @Override
+    public void assemble() {
+        super.assemble(); // Call the basic car assemble method
+        System.out.print("Adding features of Sports Car. ");
+    }
+}
+
+// Step 5: Concrete Decorator for a Luxury Car
+class LuxuryCar extends CarDecorator {
+    public LuxuryCar(Car car) {
+        super(car);
+    }
+
+    @Override
+    public void assemble() {
+        super.assemble(); // Call the basic car assemble method
+        System.out.print("Adding features of Luxury Car. ");
+    }
+}
+
+// Step 6: Main class to test the decorator pattern
+public class DecoratorPatternExample {
+    public static void main(String[] args) {
+        Car sportsCar = new SportsCar(new BasicCar());
+        sportsCar.assemble();  // Output: Basic Car. Adding features of Sports Car.
+
+        System.out.println("\n*****");
+
+        Car sportsLuxuryCar = new LuxuryCar(new SportsCar(new BasicCar()));
+        sportsLuxuryCar.assemble();  // Output: Basic Car. Adding features of Sports Car. Adding features of Luxury Car.
+    }
+}
+
+
+slip-13
+Q-1
+// Step 1: Define the Volt class to represent voltage
+class Volt {
+    private int volts;
+
+    public Volt(int volts) {
+        this.volts = volts;
+    }
+
+    public int getVolts() {
+        return volts;
+    }
+
+    public void setVolts(int volts) {
+        this.volts = volts;
+    }
+}
+
+// Step 2: Define the Socket class that produces constant 120V
+class Socket {
+    // Returns the constant voltage of 120V
+    public Volt getVolt() {
+        return new Volt(120); // Default voltage of 120V
+    }
+}
+
+// Step 3: Adapter class that converts 120V to different voltages (3V, 12V, 120V)
+class SocketAdapter extends Socket {
+
+    // Convert 120V to 3V
+    public Volt get3Volt() {
+        Volt v = getVolt(); // Get the default 120V
+        return new Volt(v.getVolts() / 40); // 120V -> 3V
+    }
+
+    // Convert 120V to 12V
+    public Volt get12Volt() {
+        Volt v = getVolt(); // Get the default 120V
+        return new Volt(v.getVolts() / 10); // 120V -> 12V
+    }
+}
+
+// Step 4: Main class to test the Adapter pattern
+public class AdapterPatternExample {
+
+    public static void main(String[] args) {
+        Socket socket = new Socket();  // Original socket providing 120V
+        SocketAdapter adapter = new SocketAdapter(); // Adapter to convert voltages
+
+        // Getting default 120V from socket
+        Volt v120 = socket.getVolt();
+        System.out.println("Socket provides: " + v120.getVolts() + "V");
+
+        // Getting 3V using adapter
+        Volt v3 = adapter.get3Volt();
+        System.out.println("Adapter provides: " + v3.getVolts() + "V");
+
+        // Getting 12V using adapter
+        Volt v12 = adapter.get12Volt();
+        System.out.println("Adapter provides: " + v12.getVolts() + "V");
+    }
+}
+
+
+
+Slip-14
+Q-1 Write a Java Program to implement Command Design Pattern for Command Interface 
+with execute() . Use this to create variety of commands for LightOnCommand, 
+LightOffCommand, GarageDoorUpCommand, StereoOnWithCDComman. 
+
+// Step 1: Define the Command interface
+interface Command {
+    void execute();
+}
+
+// Step 2: Implement Concrete Commands
+class Light {
+    public void on() {
+        System.out.println("The light is ON");
+    }
+
+    public void off() {
+        System.out.println("The light is OFF");
+    }
+}
+
+class LightOnCommand implements Command {
+    private final Light light;
+
+    public LightOnCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.on();
+    }
+}
+
+class LightOffCommand implements Command {
+    private final Light light;
+
+    public LightOffCommand(Light light) {
+        this.light = light;
+    }
+
+    @Override
+    public void execute() {
+        light.off();
+    }
+}
+
+class GarageDoor {
+    public void up() {
+        System.out.println("The garage door is UP");
+    }
+
+    public void down() {
+        System.out.println("The garage door is DOWN");
+    }
+}
+
+class GarageDoorUpCommand implements Command {
+    private final GarageDoor garageDoor;
+
+    public GarageDoorUpCommand(GarageDoor garageDoor) {
+        this.garageDoor = garageDoor;
+    }
+
+    @Override
+    public void execute() {
+        garageDoor.up();
+    }
+}
+
+class Stereo {
+    public void on() {
+        System.out.println("Stereo is ON");
+    }
+
+    public void off() {
+        System.out.println("Stereo is OFF");
+    }
+
+    public void setCD() {
+        System.out.println("CD is set in the stereo");
+    }
+}
+
+class StereoOnWithCDCommand implements Command {
+    private final Stereo stereo;
+
+    public StereoOnWithCDCommand(Stereo stereo) {
+        this.stereo = stereo;
+    }
+
+    @Override
+    public void execute() {
+        stereo.on();
+        stereo.setCD();
+    }
+}
+
+// Step 3: Create a RemoteControl class to hold the commands
+class RemoteControl {
+    private Command slot;
+
+    public void setCommand(Command command) {
+        this.slot = command;
+    }
+
+    public void pressButton() {
+        slot.execute();
+    }
+}
+
+// Step 4: Create a main class to demonstrate the Command Pattern
+public class CommandPatternDemo {
+    public static void main(String[] args) {
+        RemoteControl remote = new RemoteControl();
+
+        Light livingRoomLight = new Light();
+        LightOnCommand lightOn = new LightOnCommand(livingRoomLight);
+        LightOffCommand lightOff = new LightOffCommand(livingRoomLight);
+
+        remote.setCommand(lightOn);
+        remote.pressButton();
+
+        remote.setCommand(lightOff);
+        remote.pressButton();
+
+        GarageDoor garageDoor = new GarageDoor();
+        GarageDoorUpCommand garageDoorUp = new GarageDoorUpCommand(garageDoor);
+
+        remote.setCommand(garageDoorUp);
+        remote.pressButton();
+
+        Stereo stereo = new Stereo();
+        StereoOnWithCDCommand stereoOnWithCD = new StereoOnWithCDCommand(stereo);
+
+        remote.setCommand(stereoOnWithCD);
+        remote.pressButton();
+    }
+}
+
+
+
+Slip -15
+Q-1 Write a Java Program to implement Facade Design Pattern for Home Theater
+  // Step 1: Subsystem classes
+
+// Subsystem classes
+class DVDPlayer {
+    void on() { System.out.println("DVD Player ON"); }
+    void play() { System.out.println("DVD Playing"); }
+    void off() { System.out.println("DVD Player OFF"); }
+}
+
+class Projector {
+    void on() { System.out.println("Projector ON"); }
+    void wideScreenMode() { System.out.println("Projector in widescreen mode"); }
+    void off() { System.out.println("Projector OFF"); }
+}
+
+class Amplifier {
+    void on() { System.out.println("Amplifier ON"); }
+    void setVolume(int volume) { System.out.println("Amplifier volume set to " + volume); }
+    void off() { System.out.println("Amplifier OFF"); }
+}
+
+class Lights {
+    void dim(int level) { System.out.println("Lights dimmed to " + level + "%"); }
+    void on() { System.out.println("Lights ON"); }
+}
+
+// Facade class
+class HomeTheaterFacade {
+    private DVDPlayer dvdPlayer = new DVDPlayer();
+    private Projector projector = new Projector();
+    private Amplifier amplifier = new Amplifier();
+    private Lights lights = new Lights();
+
+    void watchMovie() {
+        lights.dim(10);
+        projector.on();
+        projector.wideScreenMode();
+        amplifier.on();
+        amplifier.setVolume(5);
+        dvdPlayer.on();
+        dvdPlayer.play();
+    }
+
+    void endMovie() {
+        lights.on();
+        projector.off();
+        amplifier.off();
+        dvdPlayer.off();
+    }
+}
+
+// Client code
+public class FacadePatternExample {
+    public static void main(String[] args) {
+        HomeTheaterFacade homeTheater = new HomeTheaterFacade();
+        homeTheater.watchMovie();  // Watch movie with simplified interface
+        homeTheater.endMovie();    // End movie with simplified interface
+    }
+}
+
+
+
+slip-16
+Q-1 Write a Java Program to implement Observer Design Pattern for number conversion. 
+Accept a number in Decimal form and represent it in Hexadecimal, Octal and Binary. 
+Change the Number and it reflects in other forms also 
+
+import java.util.*;
+
+// Step 1: Observer Interface
+interface Observer {
+    void update(int decimalNumber);
+}
+
+// Step 2: Concrete Observer Classes for different representations
+
+class BinaryObserver implements Observer {
+    @Override
+    public void update(int decimalNumber) {
+        System.out.println("Binary: " + Integer.toBinaryString(decimalNumber));
+    }
+}
+
+class OctalObserver implements Observer {
+    @Override
+    public void update(int decimalNumber) {
+        System.out.println("Octal: " + Integer.toOctalString(decimalNumber));
+    }
+}
+
+class HexadecimalObserver implements Observer {
+    @Override
+    public void update(int decimalNumber) {
+        System.out.println("Hexadecimal: " + Integer.toHexString(decimalNumber).toUpperCase());
+    }
+}
+
+// Step 3: Subject class to notify observers
+
+class DecimalNumber {
+    private List<Observer> observers = new ArrayList<>();
+    private int decimalNumber;
+
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    public void setDecimalNumber(int decimalNumber) {
+        this.decimalNumber = decimalNumber;
+        notifyObservers();
+    }
+
+    public int getDecimalNumber() {
+        return decimalNumber;
+    }
+
+    private void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(decimalNumber);
+        }
+    }
+}
+
+// Step 4: Main Class to test the Observer Pattern
+
+public class ObserverPatternExample {
+    public static void main(String[] args) {
+        // Create a DecimalNumber (Subject)
+        DecimalNumber decimalNumber = new DecimalNumber();
+
+        // Create observers (Binary, Octal, Hexadecimal)
+        BinaryObserver binaryObserver = new BinaryObserver();
+        OctalObserver octalObserver = new OctalObserver();
+        HexadecimalObserver hexadecimalObserver = new HexadecimalObserver();
+
+        // Add observers to the subject
+        decimalNumber.addObserver(binaryObserver);
+        decimalNumber.addObserver(octalObserver);
+        decimalNumber.addObserver(hexadecimalObserver);
+
+        // Change the decimal number and notify observers
+        System.out.println("Setting decimal number to 25:");
+        decimalNumber.setDecimalNumber(25);  // This will update all observers
+
+        System.out.println("\nSetting decimal number to 100:");
+        decimalNumber.setDecimalNumber(100);  // This will update all observers
+    }
+}
+
+
+slip-18
+Q-1 slip no 3 q1
+
+slip-19
+Q-1  slip no 4 q1
+
+slip-20
+Q-1 slip no 1 q1
